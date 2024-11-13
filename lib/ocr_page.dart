@@ -82,7 +82,7 @@ class _OcrPageState extends State<OcrPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("文字识别")),
+      appBar: AppBar(title: const Text("文字识别")),
       body: Column(
         children: [
           if (_isCameraInitialized)
