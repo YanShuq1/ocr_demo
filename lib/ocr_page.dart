@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class OcrPage extends StatefulWidget {
+  const OcrPage({super.key});
+
   @override
   _OcrPageState createState() => _OcrPageState();
 }
@@ -11,6 +15,9 @@ class _OcrPageState extends State<OcrPage> {
   late CameraController _cameraController;
   bool _isCameraInitialized = false;
   List<String> _recognizedTextLines = [];
+  bool _isOcr = false;
+  Timer? _timer;  //Timer类
+  final halfSecond = const Duration(milliseconds: 500);
 
   final textRecognizer = TextRecognizer();
 
@@ -42,10 +49,26 @@ class _OcrPageState extends State<OcrPage> {
     final image = await _cameraController.takePicture();
     final inputImage = InputImage.fromFilePath(image.path);
 
-    final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+    final RecognizedText recognizedText =
+        await textRecognizer.processImage(inputImage);
 
     setState(() {
       _recognizedTextLines = recognizedText.text.split('\n');
+    });
+  }
+
+    void _toggleRecognition() {
+    if (_isOcr) {
+      // 停止定时识别
+      _timer?.cancel();
+    } else {
+      _timer = Timer.periodic(halfSecond, (timer) {
+        _captureAndRecognizeText();
+      });
+    }
+
+    setState(() {
+      _isOcr = !_isOcr;
     });
   }
 
@@ -69,8 +92,8 @@ class _OcrPageState extends State<OcrPage> {
             ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: _captureAndRecognizeText,
-            child: Text("拍照并识别文字"),
+            onPressed: _toggleRecognition,
+            child: Text(_isOcr?"停止":"开始文字识别"),
           ),
           const SizedBox(height: 20),
           Expanded(
@@ -78,10 +101,11 @@ class _OcrPageState extends State<OcrPage> {
               itemCount: _recognizedTextLines.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 2.0, horizontal: 8.0),
                   child: Text(
                     _recognizedTextLines[index],
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 );
               },
