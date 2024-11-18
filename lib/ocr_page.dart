@@ -16,7 +16,7 @@ class _OcrPageState extends State<OcrPage> {
   bool _isCameraInitialized = false;
   List<String> _recognizedTextLines = [];
   bool _isOcr = false;
-  Timer? _timer;  //Timer类
+  Timer? _timer; //Timer类
   final halfSecond = const Duration(milliseconds: 500);
 
   final textRecognizer = TextRecognizer();
@@ -57,7 +57,7 @@ class _OcrPageState extends State<OcrPage> {
     });
   }
 
-    void _toggleRecognition() {
+  void _toggleRecognition() {
     if (_isOcr) {
       // 停止定时识别
       _timer?.cancel();
@@ -70,6 +70,19 @@ class _OcrPageState extends State<OcrPage> {
     setState(() {
       _isOcr = !_isOcr;
     });
+  }
+
+  void _shotRecognition() {
+    if (_isOcr) {
+      // 停止定时识别
+      _timer?.cancel();
+      _captureAndRecognizeText();
+      setState(() {
+        _isOcr = !_isOcr;
+      });
+    } else {
+      _captureAndRecognizeText();
+    }
   }
 
   @override
@@ -93,7 +106,11 @@ class _OcrPageState extends State<OcrPage> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _toggleRecognition,
-            child: Text(_isOcr?"停止":"开始文字识别"),
+            child: Text(_isOcr ? "停止" : "开始文字识别"),
+          ),
+          ElevatedButton(
+            onPressed: _shotRecognition,
+            child: Text(_isOcr ? "停止并拍照识别" : "拍照识别"),
           ),
           const SizedBox(height: 20),
           Expanded(
